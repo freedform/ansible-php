@@ -1,0 +1,3 @@
+php_config_path: /etc/php
+php_config_owner_user: root
+php_config_owner_group: root

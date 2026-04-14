@@ -1,0 +1,9 @@
+; Managed by Ansible — do not edit
+
+{% for section, settings in php_ini_settings.items() %}
+[{{ section }}]
+{% for key, value in settings.items() %}
+{{ key }} = {{ value }}
+{% endfor %}
+
+{% endfor %}

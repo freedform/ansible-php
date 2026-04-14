@@ -1,0 +1,6 @@
+; Managed by Ansible — do not edit
+
+[{{ fpm_pool_name }}]
+{% for key, value in fpm_pool_settings.items() %}
+{{ key }} = {{ value }}
+{% endfor %}

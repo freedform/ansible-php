@@ -1,0 +1,78 @@
+---
+- name: Create php_action_list
+  ansible.builtin.set_fact:
+    php_action_list: "{{ php_actions.split(',') }}"
+
+- name: Validate php_action_list
+  ansible.builtin.assert:
+    that:
+      - php_action_list | length > 0
+      - php_action_list | difference(php_supported_actions) | length == 0
+
+- name: Validate PHP installation
+  when: "'install' in php_action_list"
+  ansible.builtin.include_tasks: install.yml
+
+- name: Validate PHP ini settings
+  when: "'deploy_php_config' in php_action_list"
+  block:
+    - name: Validate required variables
+      ansible.builtin.assert:
+        that:
+          - php_packages is defined
+          - php_packages is mapping
+          - php_ini_settings is defined
+          - php_ini_settings is mapping
+          - php_config_path is defined
+          - php_config_owner_user is defined
+          - php_config_owner_group is defined
+
+    - name: Deploy PHP ini settings
+      ansible.builtin.include_tasks: deploy_php_config.yml
+      vars:
+        php_version: "{{ php_ver.key }}"
+        php_sapi_dict: "{{ php_ver.value }}"
+      loop: "{{ php_ini_settings | dict2items }}"
+      loop_control:
+        loop_var: php_ver
+        label: "PHP {{ php_ver.key }}"
+      when: php_packages[php_ver.key].state == 'present'
+
+- name: Validate PHP FPM pools
+  when: "'deploy_fpm_pools' in php_action_list"
+  block:
+    - name: Validate required variables
+      ansible.builtin.assert:
+        that:
+          - php_packages is defined
+          - php_packages is mapping
+          - php_fmp_pools is defined
+          - php_fmp_pools is mapping
+          - php_config_path is defined
+          - php_config_owner_user is defined
+          - php_config_owner_group is defined
+
+    - name: Deploy PHP ini settings
+      ansible.builtin.include_tasks: deploy_fpm_pools.yml
+      vars:
+        php_version: "{{ php_ver.key }}"
+        php_fpm_dict: "{{ php_ver.value }}"
+      loop: "{{ php_fmp_pools | dict2items }}"
+      loop_control:
+        loop_var: php_ver
+        label: "PHP {{ php_ver.key }}"
+      when: php_packages[php_ver.key].state == 'present'
+
+- name: Validate PHP FPM pools
+  when: "'fpm_state_control' in php_action_list"
+  block:
+    - name: Validate required variables
+      ansible.builtin.assert:
+        that:
+          - php_packages is defined
+          - php_packages is mapping
+          - php_fpm_version is defined
+          - php_fpm_version in php_packages
+          - php_fpm_state_action in ['started', 'stopped', 'restarted', 'reloaded']
+    - name: Deploy PHP ini settings
+      ansible.builtin.include_tasks: fpm_state_control.yml

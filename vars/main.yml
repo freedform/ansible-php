@@ -1,0 +1,5 @@
+php_supported_actions:
+  - install
+  - deploy_php_config
+  - deploy_fpm_pools
+  - fpm_state_control

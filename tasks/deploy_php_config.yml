@@ -1,0 +1,14 @@
+- name: Deploy PHP ini settings
+  ansible.builtin.template:
+    src: php-overrides.ini.j2
+    dest: "{{ php_config_path }}/{{ php_version }}/{{ php_sapi.key }}/conf.d/99-from-ansible.ini"
+    owner: "{{ php_config_owner_user }}"
+    group: "{{ php_config_owner_group }}"
+    mode: '0644'
+  when: php_sapi.value is mapping
+  loop: "{{ php_sapi_dict | dict2items }}"
+  loop_control:
+    loop_var: php_sapi
+    label: "{{ php_version }} {{ php_sapi.key }}"
+  vars:
+    php_ini_settings: "{{ php_sapi.value }}"

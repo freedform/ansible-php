@@ -1,0 +1,4 @@
+- name: Control PHP FPM service
+  ansible.builtin.service:
+    name: "php{{ php_fpm_version }}-fpm"
+    state: "{{ php_fpm_state_action }}"

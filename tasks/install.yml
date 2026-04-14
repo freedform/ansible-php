@@ -1,0 +1,40 @@
+- name: Validate php_packages variable
+  ansible.builtin.assert:
+    that:
+      - php_packages is defined
+      - php_packages is mapping
+
+- name: Install PHP repositories
+  ansible.builtin.apt_repository:
+    repo: "{{ item }}"
+    state: present
+    update_cache: false
+  when:
+    - php_repositories is defined
+    - php_repositories is not string
+    - php_repositories is iterable
+  loop: "{{ php_repositories }}"
+  loop_control:
+    label: "PHP repo {{ item }}"
+
+- name: Update APT cache
+  ansible.builtin.apt:
+    update_cache: true
+    # cache_valid_time: 3600
+
+- name: Ensure PHP versions are present or absent
+  ansible.builtin.apt:
+    name: "php{{ item.key }}"
+    state: "{{ item.value.state }}"
+  loop: "{{ php_packages | dict2items }}"
+  loop_control:
+    label: "PHP {{ item.key }}"
+
+- name: Manage PHP packages per version
+  ansible.builtin.apt:
+    name: "php{{ item.0.key }}-{{ item.1.name }}"
+    state: "{{ item.1.state }}"
+  loop: "{{ php_packages | dict2items | subelements('value.packages', skip_missing=True) }}"
+  loop_control:
+    label: "php{{ item.0.key }}-{{ item.1.name }} => {{ item.1.state }}"
+  when: item.0.value.state == 'present'

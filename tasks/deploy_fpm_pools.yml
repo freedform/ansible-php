@@ -1,0 +1,15 @@
+- name: Deploy PHP FPM pools
+  ansible.builtin.template:
+    src: fpm_pool.conf.j2
+    dest: "{{ php_config_path }}/{{ php_version }}/fpm/pool.d/{{ fpm_pool.key }}.conf"
+    owner: "{{ php_config_owner_user }}"
+    group: "{{ php_config_owner_group }}"
+    mode: '0644'
+  when: fpm_pool.value is mapping
+  loop: "{{ php_fpm_dict | dict2items }}"
+  loop_control:
+    loop_var: fpm_pool
+    label: "{{ php_version }} {{ fpm_pool.key }}"
+  vars:
+    fpm_pool_name: "{{ fpm_pool.key }}"
+    fpm_pool_settings: "{{ fpm_pool.value }}"
