@@ -3,3 +3,9 @@ php_supported_actions:
   - deploy_php_config
   - deploy_fpm_pools
   - fpm_state_control
+
+php_fpm_supported_states:
+  - started
+  - stopped
+  - restarted
+  - reloaded

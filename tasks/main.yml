@@ -73,6 +73,6 @@
           - php_packages is mapping
           - php_fpm_version is defined
           - php_fpm_version in php_packages
-          - php_fpm_state_action in ['started', 'stopped', 'restarted', 'reloaded']
+          - php_fpm_state_action in php_fpm_supported_states
     - name: Deploy PHP ini settings
       ansible.builtin.include_tasks: fpm_state_control.yml
