@@ -1,3 +1,109 @@
+# @var php_config_path:description: Main configuration directory
+# @var php_config_path:type: string
+# @end
 php_config_path: /etc/php
+
+# @var php_config_owner_user:description: PHP files owner name
+# @var php_config_owner_user:type: string
+# @end
 php_config_owner_user: root
+
+# @var php_config_owner_group:description: PHP files group name
+# @var php_config_owner_group:type: string
+# @end
 php_config_owner_group: root
+
+# @var php_actions:description: >
+# List of actions the role does, accepts one or more actions.
+# Use comma without spaces as a delimiter for multiple actions. 
+# @var php_actions:required: `true`
+# @var php_actions:type: String
+# @var php_actions:example: >
+#   php_actions: install
+#   php_actions: install,deploy_php_config
+# @end
+
+# @var php_packages:description: List of php packages to be installed
+# @var php_packages:required: `true`, only in case `php_actions: install`
+# @var php_packages:type: Dict
+# @var php_packages:example: $>
+# {
+#   "8.4": {
+#     "state": "present",
+#     "packages": [
+#       {"name": "fpm", "state": "present"},
+#       {"name": "amqp", "state": "present"}
+#     ]
+#   },
+#   "8.2": {
+#     "state": "present",
+#     "packages": [
+#       {"name": "gd", "state": "present"},
+#       {"name": "pgsql", "state": "present"}
+#     ]
+#   }
+# }
+# @end
+
+# @var php_ini_settings:description: PHP configuration directives to be applied
+# @var php_ini_settings:required: `true`, only in case `php_actions: deploy_php_config`
+# @var php_ini_settings:type: Dict
+# @var php_ini_settings:example: $>
+# {
+#   "8.4": {
+#     "fpm": {
+#       "PHP": {
+#         "post_max_size": "100M",
+#         "upload_max_filesize": "100M"
+#       }
+#     }
+#   }
+# }
+# @end
+
+# @var php_fmp_pools:description: PHP FPM configuration directives to be applied
+# @var php_fmp_pools:required: `true`, only in case `php_actions: deploy_fpm_pools`
+# @var php_fmp_pools:type: Dict
+# @var php_fmp_pools:example: $>
+# {
+#   "8.4": {
+#     "pool_1": {
+#       "parameter": "value"
+#     },
+#     "pool_2": {
+#       "parameter": "value"
+#     }
+#   },
+#   "8.2": {
+#     "pool_1": {
+#       "parameter": "value"
+#     },
+#     "pool_2": {
+#       "parameter": "value"
+#     }
+#   }
+# }
+# @end
+
+# @var php_repositories:description: List of addtional php repositories to be installed
+# @var php_repositories:type: List
+# @var php_repositories:example: $>
+# [
+#   "ppa:ondrej/php",
+#   "ppa:php"
+# ]
+# @end
+
+# @var php_fpm_state_action:description: Controls state of PHP FMP process
+# @var php_fpm_state_action:type: String
+# @var php_fpm_state_action:required: `true`, only in case `php_actions: fpm_state_control`
+# @var php_fpm_state_action:example: >
+#   php_fpm_state_action: restarted
+#   php_fpm_state_action: stopped
+# @end
+
+# @var php_fpm_version:description: Set PHP FPM version to control
+# @var php_fpm_version:type: String
+# @var php_fpm_version:required: `true`, only in case `php_actions: fpm_state_control`
+# @var php_fpm_version:example: php_fpm_state_action: 7.2
+# @end

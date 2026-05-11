@@ -1,6 +1,6 @@
 galaxy_info:
   author: freedform
-  description: php role
+  description: Role php fully automates control over PHP packages, services and configuration.
   min_ansible_version: "2.20"
   license: MIT
 
