@@ -1,14 +1,21 @@
+- name: Validate variables for deploy_php_config.yml task
+  ansible.builtin.assert:
+    that:
+      - php_packages is defined
+      - php_packages is mapping
+      - php_ini_settings is defined
+      - php_ini_settings is mapping
+      - php_config_path is defined
+      - php_config_owner_user is defined
+      - php_config_owner_group is defined
+
 - name: Deploy PHP ini settings
-  ansible.builtin.template:
-    src: php-overrides.ini.j2
-    dest: "{{ php_config_path }}/{{ php_version }}/{{ php_sapi.key }}/conf.d/99-from-ansible.ini"
-    owner: "{{ php_config_owner_user }}"
-    group: "{{ php_config_owner_group }}"
-    mode: '0644'
-  when: php_sapi.value is mapping
-  loop: "{{ php_sapi_dict | dict2items }}"
-  loop_control:
-    loop_var: php_sapi
-    label: "{{ php_version }} {{ php_sapi.key }}"
+  ansible.builtin.include_tasks: deploy_php_config_sapi.yml
   vars:
-    php_ini_settings: "{{ php_sapi.value }}"
+    php_version: "{{ php_ver.key }}"
+    php_sapi_dict: "{{ php_ver.value }}"
+  loop: "{{ php_ini_settings | dict2items }}"
+  loop_control:
+    loop_var: php_ver
+    label: "PHP {{ php_ver.key }}"
+  when: php_packages[php_ver.key].state == 'present'

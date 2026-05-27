@@ -1,3 +1,12 @@
+- name: Validate variables for fpm_state_control.yml task
+  ansible.builtin.assert:
+    that:
+      - php_packages is defined
+      - php_packages is mapping
+      - php_fpm_version is defined
+      - php_fpm_version in php_packages
+      - php_fpm_state_action in php_fpm_supported_states
+
 - name: Control PHP FPM service
   ansible.builtin.service:
     name: "php{{ php_fpm_version }}-fpm"

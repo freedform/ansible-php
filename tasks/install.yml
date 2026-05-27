@@ -13,6 +13,7 @@
     - php_repositories is defined
     - php_repositories is not string
     - php_repositories is iterable
+    - php_repositories | length > 0
   loop: "{{ php_repositories }}"
   loop_control:
     label: "PHP repo {{ item }}"
@@ -20,7 +21,7 @@
 - name: Update APT cache
   ansible.builtin.apt:
     update_cache: true
-    # cache_valid_time: 3600
+    cache_valid_time: 3600
 
 - name: Ensure PHP versions are present or absent
   ansible.builtin.apt:
