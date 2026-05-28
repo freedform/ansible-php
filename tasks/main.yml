@@ -1,13 +1,14 @@
 ---
 - name: Create php_action_list
   ansible.builtin.set_fact:
-    php_action_list: "{{ php_actions.split(',') }}"
+    php_action_list: "{{ (php_actions | default('')).split(',') | reject('equalto', '') | list }}"
 
 - name: Validate php_action_list
   ansible.builtin.assert:
     that:
       - php_action_list | length > 0
       - php_action_list | difference(php_supported_actions) | length == 0
+    fail_msg: "php_actions must be set to one or more of: {{ php_supported_actions | join(', ') }}"
 
 - name: Run php action
   ansible.builtin.include_tasks: "{{ task_name }}.yml"
