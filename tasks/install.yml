@@ -6,7 +6,7 @@
 
 - name: Install PHP repositories
   ansible.builtin.apt_repository:
-    repo: "{{ item }}"
+    repo: "{{ php_repository }}"
     state: present
     update_cache: false
   when:
@@ -16,7 +16,8 @@
     - php_repositories | length > 0
   loop: "{{ php_repositories }}"
   loop_control:
-    label: "PHP repo {{ item }}"
+    loop_var: php_repository
+    label: "PHP repo {{ php_repository }}"
 
 - name: Update APT cache
   ansible.builtin.apt:
@@ -25,17 +26,19 @@
 
 - name: Ensure PHP versions are present or absent
   ansible.builtin.apt:
-    name: "php{{ item.key }}"
-    state: "{{ item.value.state }}"
+    name: "php{{ php_version.key }}"
+    state: "{{ php_version.value.state }}"
   loop: "{{ php_packages | dict2items }}"
   loop_control:
-    label: "PHP {{ item.key }}"
+    loop_var: php_version
+    label: "PHP {{ php_version.key }}"
 
 - name: Manage PHP packages per version
   ansible.builtin.apt:
-    name: "php{{ item.0.key }}-{{ item.1.name }}"
-    state: "{{ item.1.state }}"
+    name: "php{{ php_version_pkg.0.key }}-{{ php_version_pkg.1.name }}"
+    state: "{{ php_version_pkg.1.state }}"
   loop: "{{ php_packages | dict2items | subelements('value.packages', skip_missing=True) }}"
   loop_control:
-    label: "php{{ item.0.key }}-{{ item.1.name }} => {{ item.1.state }}"
-  when: item.0.value.state == 'present'
+    loop_var: php_version_pkg
+    label: "php{{ php_version_pkg.0.key }}-{{ php_version_pkg.1.name }} => {{ php_version_pkg.1.state }}"
+  when: php_version_pkg.0.value.state == 'present'
