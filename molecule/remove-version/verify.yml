@@ -1,0 +1,23 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+        manager: apt
+
+    - name: Assert php8.3 metapackage was removed
+      ansible.builtin.assert:
+        that: "'php8.3' not in ansible_facts.packages"
+        fail_msg: "php8.3 metapackage should not be installed"
+
+    - name: Assert php8.3-fpm is still installed
+      ansible.builtin.assert:
+        that: "'php8.3-fpm' in ansible_facts.packages"
+        fail_msg: "php8.3-fpm should still be installed after metapackage removal"
+
+    - name: Assert php8.3-cli is still installed
+      ansible.builtin.assert:
+        that: "'php8.3-cli' in ansible_facts.packages"
+        fail_msg: "php8.3-cli should still be installed after metapackage removal"

@@ -1,0 +1,13 @@
+---
+- name: Prepare
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Install php8.3 packages
+      ansible.builtin.apt:
+        name:
+          - php8.3
+          - php8.3-fpm
+          - php8.3-cli
+        state: present
+        update_cache: true

@@ -1,0 +1,101 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Stat php-fpm8.3 binary
+      ansible.builtin.stat:
+        path: /usr/sbin/php-fpm8.3
+      register: php_fpm_binary
+
+    - name: Assert php-fpm8.3 binary exists
+      ansible.builtin.assert:
+        that: php_fpm_binary.stat.exists
+        fail_msg: "/usr/sbin/php-fpm8.3 should exist"
+
+    - name: Stat PHP ini overrides file
+      ansible.builtin.stat:
+        path: /etc/php/8.3/fpm/conf.d/99-from-ansible.ini
+      register: php_ini_overrides
+
+    - name: Assert PHP ini overrides file exists
+      ansible.builtin.assert:
+        that: php_ini_overrides.stat.exists
+        fail_msg: "/etc/php/8.3/fpm/conf.d/99-from-ansible.ini should exist"
+
+    - name: Assert PHP ini overrides file has mode 0644
+      ansible.builtin.assert:
+        that: "php_ini_overrides.stat.mode == '0644'"
+        fail_msg: "/etc/php/8.3/fpm/conf.d/99-from-ansible.ini should have mode 0644"
+
+    - name: Fetch PHP ini overrides content
+      ansible.builtin.slurp:
+        src: /etc/php/8.3/fpm/conf.d/99-from-ansible.ini
+      register: php_ini_content
+
+    - name: Assert ini overrides contain post_max_size
+      ansible.builtin.assert:
+        that: "'post_max_size = 64M' in (php_ini_content.content | b64decode)"
+        fail_msg: "/etc/php/8.3/fpm/conf.d/99-from-ansible.ini should contain 'post_max_size = 64M'"
+
+    - name: Assert ini overrides contain upload_max_filesize
+      ansible.builtin.assert:
+        that: "'upload_max_filesize = 64M' in (php_ini_content.content | b64decode)"
+        fail_msg: "/etc/php/8.3/fpm/conf.d/99-from-ansible.ini should contain 'upload_max_filesize = 64M'"
+
+    - name: Stat molecule_test FPM pool config
+      ansible.builtin.stat:
+        path: /etc/php/8.3/fpm/pool.d/molecule_test.conf
+      register: fpm_pool_conf
+
+    - name: Assert molecule_test pool config exists
+      ansible.builtin.assert:
+        that: fpm_pool_conf.stat.exists
+        fail_msg: "/etc/php/8.3/fpm/pool.d/molecule_test.conf should exist"
+
+    - name: Assert molecule_test pool config has mode 0644
+      ansible.builtin.assert:
+        that: "fpm_pool_conf.stat.mode == '0644'"
+        fail_msg: "/etc/php/8.3/fpm/pool.d/molecule_test.conf should have mode 0644"
+
+    - name: Fetch molecule_test pool config content
+      ansible.builtin.slurp:
+        src: /etc/php/8.3/fpm/pool.d/molecule_test.conf
+      register: fpm_pool_content
+
+    - name: Assert pool config contains pool section header
+      ansible.builtin.assert:
+        that: "'[molecule_test]' in (fpm_pool_content.content | b64decode)"
+        fail_msg: "/etc/php/8.3/fpm/pool.d/molecule_test.conf should contain [molecule_test]"
+
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Assert php8.3-fpm service is running
+      ansible.builtin.assert:
+        that: "ansible_facts.services['php8.3-fpm.service'].state == 'running'"
+        fail_msg: "php8.3-fpm.service should be running"
+
+    # - name: Gather package facts
+    #   ansible.builtin.package_facts:
+    #     manager: apt
+
+    # - name: Assert php8.3-curl was removed
+    #   ansible.builtin.assert:
+    #     that: "'php8.3-curl' not in ansible_facts.packages"
+    #     fail_msg: "php8.3-curl should not be installed"
+
+    # - name: Assert php8.3 metapackage was removed
+    #   ansible.builtin.assert:
+    #     that: "'php8.3' not in ansible_facts.packages"
+    #     fail_msg: "php8.3 metapackage should not be installed"
+
+    # - name: Assert php8.3-fpm is still installed
+    #   ansible.builtin.assert:
+    #     that: "'php8.3-fpm' in ansible_facts.packages"
+    #     fail_msg: "php8.3-fpm should still be installed after metapackage removal"
+
+    # - name: Assert php8.3-cli is still installed
+    #   ansible.builtin.assert:
+    #     that: "'php8.3-cli' in ansible_facts.packages"
+    #     fail_msg: "php8.3-cli should still be installed after metapackage removal"

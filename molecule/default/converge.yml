@@ -1,0 +1,37 @@
+---
+- name: Converge
+  hosts: all
+  gather_facts: true
+  roles:
+    - role: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}"
+      vars:
+        php_actions: install,deploy_php_config,deploy_fpm_pools,fpm_state_control
+        php_packages:
+          "8.3":
+            state: present
+            packages:
+              - name: fpm
+                state: present
+              - name: cli
+                state: present
+              - name: curl
+                state: present
+        php_ini_settings:
+          "8.3":
+            fpm:
+              PHP:
+                post_max_size: 64M
+                upload_max_filesize: 64M
+        php_fpm_pools:
+          "8.3":
+            molecule_test:
+              user: www-data
+              group: www-data
+              listen: /run/php/php8.3-fpm-molecule.sock
+              pm: dynamic
+              pm.max_children: 5
+              pm.start_servers: 2
+              pm.min_spare_servers: 1
+              pm.max_spare_servers: 3
+        php_fpm_version: "8.3"
+        php_fpm_state_action: started
