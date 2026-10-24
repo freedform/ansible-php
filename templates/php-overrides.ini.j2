@@ -1,6 +1,6 @@
 ; Managed by Ansible — do not edit
 
-{% for section, settings in php_ini_settings.items() %}
+{% for section, settings in php_ini_sapi_settings.items() %}
 [{{ section }}]
 {% for key, value in settings.items() %}
 {{ key }} = {{ value }}

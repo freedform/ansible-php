@@ -11,4 +11,4 @@
     loop_var: php_sapi
     label: "{{ php_version }} {{ php_sapi.key }}"
   vars:
-    php_ini_settings: "{{ php_sapi.value }}"
+    php_ini_sapi_settings: "{{ php_sapi.value }}"
