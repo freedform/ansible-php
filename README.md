@@ -11,6 +11,7 @@ Role php fully automates control over PHP packages, services and configuration.
   - [php_config_owner_user](#php_config_owner_user)
   - [php_config_path](#php_config_path)
   - [php_fpm_pools](#php_fpm_pools)
+  - [php_fpm_pools_file](#php_fpm_pools_file)
   - [php_fpm_state_action](#php_fpm_state_action)
   - [php_fpm_version](#php_fpm_version)
   - [php_ini_settings](#php_ini_settings)
@@ -81,7 +82,9 @@ php_config_path: /etc/php
 
 ### php_fpm_pools
 
-PHP FPM pool configuration to be applied per version
+PHP FPM pool configuration to be applied per version.
+All pools of a version are rendered into `php_fpm_pools_file` and validated with `php-fpm -t`,
+pools missing from the variable are removed from the server.
 
 **_Required:_** `true`, only in case `php_actions: deploy_fpm_pools`<br />
 **_Type:_** Dict<br />
@@ -98,6 +101,19 @@ php_fpm_pools:
   '8.2':
     pool_1:
       parameter: value
+```
+
+### php_fpm_pools_file
+
+File inside pool.d that holds all PHP FPM pools of a version.
+Any other *.conf file in pool.d is removed by deploy_fpm_pools.
+
+**_Type:_** String<br />
+
+#### Default value
+
+```YAML
+php_fpm_pools_file: pools.conf
 ```
 
 ### php_fpm_state_action

@@ -61,7 +61,17 @@ php_config_owner_group: root
 # }
 # @end
 
-# @var php_fpm_pools:description: PHP FPM pool configuration to be applied per version
+# @var php_fpm_pools_file:description: >
+# File inside pool.d that holds all PHP FPM pools of a version.
+# Any other *.conf file in pool.d is removed by deploy_fpm_pools.
+# @var php_fpm_pools_file:type: String
+# @end
+php_fpm_pools_file: pools.conf
+
+# @var php_fpm_pools:description: >
+# PHP FPM pool configuration to be applied per version.
+# All pools of a version are rendered into `php_fpm_pools_file` and validated with `php-fpm -t`,
+# pools missing from the variable are removed from the server.
 # @var php_fpm_pools:required: `true`, only in case `php_actions: deploy_fpm_pools`
 # @var php_fpm_pools:type: Dict
 # @var php_fpm_pools:example: $>

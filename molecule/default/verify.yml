@@ -43,30 +43,40 @@
         that: "'upload_max_filesize = 64M' in (php_ini_content.content | b64decode)"
         fail_msg: "/etc/php/8.3/fpm/conf.d/99-from-ansible.ini should contain 'upload_max_filesize = 64M'"
 
-    - name: Stat molecule_test FPM pool config
+    - name: Stat FPM pools config
       ansible.builtin.stat:
-        path: /etc/php/8.3/fpm/pool.d/molecule_test.conf
-      register: fpm_pool_conf
+        path: /etc/php/8.3/fpm/pool.d/pools.conf
+      register: fpm_pools_conf
 
-    - name: Assert molecule_test pool config exists
+    - name: Assert FPM pools config exists
       ansible.builtin.assert:
-        that: fpm_pool_conf.stat.exists
-        fail_msg: "/etc/php/8.3/fpm/pool.d/molecule_test.conf should exist"
+        that: fpm_pools_conf.stat.exists
+        fail_msg: "/etc/php/8.3/fpm/pool.d/pools.conf should exist"
 
-    - name: Assert molecule_test pool config has mode 0644
+    - name: Assert FPM pools config has mode 0644
       ansible.builtin.assert:
-        that: "fpm_pool_conf.stat.mode == '0644'"
-        fail_msg: "/etc/php/8.3/fpm/pool.d/molecule_test.conf should have mode 0644"
+        that: "fpm_pools_conf.stat.mode == '0644'"
+        fail_msg: "/etc/php/8.3/fpm/pool.d/pools.conf should have mode 0644"
 
-    - name: Fetch molecule_test pool config content
+    - name: Fetch FPM pools config content
       ansible.builtin.slurp:
-        src: /etc/php/8.3/fpm/pool.d/molecule_test.conf
-      register: fpm_pool_content
+        src: /etc/php/8.3/fpm/pool.d/pools.conf
+      register: fpm_pools_content
 
-    - name: Assert pool config contains pool section header
+    - name: Assert pools config contains molecule_test pool section header
       ansible.builtin.assert:
-        that: "'[molecule_test]' in (fpm_pool_content.content | b64decode)"
-        fail_msg: "/etc/php/8.3/fpm/pool.d/molecule_test.conf should contain [molecule_test]"
+        that: "'[molecule_test]' in (fpm_pools_content.content | b64decode)"
+        fail_msg: "/etc/php/8.3/fpm/pool.d/pools.conf should contain [molecule_test]"
+
+    - name: Stat package default www pool config
+      ansible.builtin.stat:
+        path: /etc/php/8.3/fpm/pool.d/www.conf
+      register: fpm_www_conf
+
+    - name: Assert unmanaged www pool config was removed
+      ansible.builtin.assert:
+        that: not fpm_www_conf.stat.exists
+        fail_msg: "/etc/php/8.3/fpm/pool.d/www.conf should be removed as it is not declared in php_fpm_pools"
 
     - name: Gather service facts
       ansible.builtin.service_facts:

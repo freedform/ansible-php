@@ -1,15 +1,24 @@
-- name: Deploy PHP FPM pool for "{{ php_version }}"
+- name: Deploy PHP FPM pools for "{{ php_version }}"
   ansible.builtin.template:
-    src: fpm_pool.conf.j2
-    dest: "{{ php_config_path }}/{{ php_version }}/fpm/pool.d/{{ fpm_pool.key }}.conf"
+    src: fpm_pools.conf.j2
+    dest: "{{ php_config_path }}/{{ php_version }}/fpm/pool.d/{{ php_fpm_pools_file }}"
     owner: "{{ php_config_owner_user }}"
     group: "{{ php_config_owner_group }}"
     mode: '0644'
-  when: fpm_pool.value is mapping
-  loop: "{{ php_fpm_dict | dict2items }}"
+    validate: "php-fpm{{ php_version }} -t -y %s"
+
+- name: Find unmanaged PHP FPM pool files for "{{ php_version }}"
+  ansible.builtin.find:
+    paths: "{{ php_config_path }}/{{ php_version }}/fpm/pool.d"
+    patterns: "*.conf"
+    excludes: "{{ php_fpm_pools_file }}"
+  register: php_fpm_unmanaged_pool_files
+
+- name: Remove unmanaged PHP FPM pool files for "{{ php_version }}"
+  ansible.builtin.file:
+    path: "{{ php_fpm_unmanaged_pool_file.path }}"
+    state: absent
+  loop: "{{ php_fpm_unmanaged_pool_files.files }}"
   loop_control:
-    loop_var: fpm_pool
-    label: "{{ php_version }} {{ fpm_pool.key }}"
-  vars:
-    fpm_pool_name: "{{ fpm_pool.key }}"
-    fpm_pool_settings: "{{ fpm_pool.value }}"
+    loop_var: php_fpm_unmanaged_pool_file
+    label: "{{ php_fpm_unmanaged_pool_file.path }}"

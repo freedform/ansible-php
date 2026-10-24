@@ -1,6 +1,8 @@
 ; Managed by Ansible — do not edit
+{% for fpm_pool_name, fpm_pool_settings in php_fpm_dict.items() if fpm_pool_settings is mapping %}
 
 [{{ fpm_pool_name }}]
 {% for key, value in fpm_pool_settings.items() %}
 {{ key }} = {{ value }}
+{% endfor %}
 {% endfor %}
